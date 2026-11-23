@@ -1,0 +1,39 @@
+name: Draw
+
+# Redraws the profile each morning, and whenever the script changes.
+# The run's own token reads the contribution calendar as the public sees it. It cannot see private
+# repositories, so the language split stays as it was last drawn from a computer signed in as the owner
+# (`node scripts/build.mjs`); a PROFILE_TOKEN secret with repository read access would keep that current too.
+
+on:
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['scripts/**', 'fonts/**']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: draw
+  cancel-in-progress: true
+
+jobs:
+  draw:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/build.mjs
+        env:
+          GH_TOKEN: ${{ secrets.PROFILE_TOKEN || github.token }}
+      - name: Commit the drawings if they changed
+        run: |
+          if [ -n "$(git status --porcelain assets data)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add assets data
+            git commit -m "Redraw"
+            git push
+          fi
