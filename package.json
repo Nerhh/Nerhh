@@ -1,0 +1,12 @@
+{
+  "name": "nerhh-profile",
+  "private": true,
+  "type": "module",
+  "description": "Draws the pictures on the github.com/Nerhh profile. No dependencies.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:offline": "node scripts/build.mjs --offline",
+    "preview": "node scripts/preview.mjs"
+  }
+}
